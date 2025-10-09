@@ -3,13 +3,10 @@
 #include "framework.h"
 #include "MyFirstGame.h"
 #include "Engine/Direct3D.h"
-//#include "Quad.h"
 #include "Engine/Camera.h"
-//#include "Dice.h"
-//#include "Sprite.h"
 #include "Engine/Transform.h"
-#include "Engine/Fbx.h"
 #include "Engine/Input.h"
+#include "Engine/RootJob.h"
 
 HWND hWnd = nullptr; //ハンドルウィンドウ
 
@@ -19,6 +16,7 @@ const wchar_t* WIN_CLASS_NAME = L"SAMPLE GAME WINDOW"; // ウィンドウ クラ
 const int WINDOW_WIDTH = 800;  //ウィンドウの幅
 const int WINDOW_HEIGHT = 600; //ウィンドウの高さ //SVGAサイズ
 
+RootJob* pRootJob = nullptr;
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -32,16 +30,16 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: ここにコードを挿入してください。
 
-	//szWindowClass = WIN_CLASS_NAME; // ウィンドウ クラス名を設定
+    //szWindowClass = WIN_CLASS_NAME; // ウィンドウ クラス名を設定
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -50,7 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
     // アプリケーション初期化の実行:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -60,35 +58,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     hr = Direct3D::Initialize(WINDOW_WIDTH, WINDOW_HEIGHT, hWnd);
     if (FAILED(hr))
     {
-		return 0;
+        return 0;
     }
 
-	Camera::Initialize(); // カメラの初期化
-    Input::Initialize(hWnd);  //DirectInputの初期化
+    Camera::Initialize(); // カメラの初期化
 
-    
+    Input::Initialize(hWnd); // 入力の初期化
+
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MYFIRSTGAME));
 
-    MSG msg = {};  
+    MSG msg = {};
+
+    pRootJob = new RootJob(nullptr);
+    pRootJob->Initialize();
 
 
-    //Quad* q = new Quad();
-	//Dice* dice = new Dice();
-	//Sprite* sprite = new Sprite();
-	Fbx* fbx = new Fbx();
-    fbx->Load("Oden.fbx");
-
-    //hr = q->Initialize();
-    //hr = dice->Initialize();
-   // hr = sprite->Initialize();
-    if (FAILED(hr))
-    {
-		return 0;
-    }
-    
-    
     // メイン メッセージ ループ:
-    while(msg.message != WM_QUIT)
+    while (msg.message != WM_QUIT)
     {
         //メッセージあり
 
@@ -99,21 +85,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         //メッセージなし
 
-		//ゲームの処理
-		Camera::Update(); // カメラの更新
-        //入力情報の更新
-        Input::Update();
+        //ゲームの処理
+        Camera::Update(); // カメラの更新
+        Input::Update(); // 入力の更新
+
+        pRootJob->Update();
 
         if (Input::IsKeyDown(DIK_ESCAPE))
-        {
-            static int cnt = 0;
-            cnt++;
-            if (cnt >= 3)
-            {
-                PostQuitMessage(0);
-            }
-        }
-        if (Input::IsMouseButtonDown(0))
         {
             static int cnt = 0;
             cnt++;
@@ -125,44 +103,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         Direct3D::BeginDraw();
 
-        //描画処理
-		//static float angle = 0.0f;
-        //XMMATRIX mat = XMMatrixRotationY(XMConvertToRadians(angle));
-		//mat *= XMMatrixTranslation(0.0f, 0.0f, 5.0f); //Z軸方向に5.0f移動
-        //q->Draw(mat);
-		//dice->Draw(mat); // ダイスの描画
-		//angle += 0.05f; //角度を更新
-
-
-
-
-		//XMMATRIX mat = XMMatrixIdentity();
-        static Transform trans;
-        trans.position_.x = 1.0f ;
-		trans.rotate_.y += 0.1f;
-		trans.Calculation();
-       // XMMATRIX Mtrs = trans.GetWorldMatrix();
-		//sprite->Draw(Mtrs);
-        fbx->Draw(trans);
-
+        //pRootJobから、すべてのオブジェクトの描画をする
 
         Direct3D::EndDraw();
     }
 
-    //q->Release();
-    //SAFE_DELETE(q);
-    //dice->Release();
-    //sprite->Release();
-	//SAFE_DELETE(dice);
-
-    Direct3D::Release();
+    pRootJob->Release();
     Input::Release();
-    return (int) msg.wParam;
+    Direct3D::Release();
+
+    return (int)msg.wParam;
 }
 
-
-
-//
 //  関数: MyRegisterClass()
 //
 //  目的: ウィンドウ クラスを登録します。
@@ -173,17 +125,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MYFIRSTGAME));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = NULL;
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MYFIRSTGAME));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
@@ -200,27 +152,27 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // グローバル変数にインスタンス ハンドルを格納する
+    hInst = hInstance; // グローバル変数にインスタンス ハンドルを格納する
 
 
-   //ウィンドウサイズの計算
-   RECT winRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
-   AdjustWindowRect(&winRect, WS_OVERLAPPEDWINDOW, FALSE);
-   int winW = winRect.right - winRect.left;     //ウィンドウ幅
-   int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
+    //ウィンドウサイズの計算
+    RECT winRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+    AdjustWindowRect(&winRect, WS_OVERLAPPEDWINDOW, FALSE);
+    int winW = winRect.right - winRect.left;     //ウィンドウ幅
+    int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
 
-   hWnd = CreateWindowW(szWindowClass, WIN_CLASS_NAME, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, winW, winH, nullptr, nullptr, hInstance, nullptr);
+    hWnd = CreateWindowW(szWindowClass, WIN_CLASS_NAME, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, winW, winH, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
 //
@@ -238,41 +190,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // 選択されたメニューの解析:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // 選択されたメニューの解析:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
+    }
+    break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: HDC を使用する描画コードをここに追加してください...
-            EndPaint(hWnd, &ps);
-        }
-        break;
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        // TODO: HDC を使用する描画コードをここに追加してください...
+        EndPaint(hWnd, &ps);
+    }
+    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
     case WM_MOUSEMOVE:
     {
         int x = LOWORD(lParam);
-        int y = LOWORD(lParam);
+        int y = HIWORD(lParam);
         Input::SetMousePosition(x, y);
         OutputDebugStringA((std::to_string(x) + "," + std::to_string(y) + "\n").c_str());
     }
-        break;
+    break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
