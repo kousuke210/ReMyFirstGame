@@ -1,4 +1,4 @@
-#include "GameObject.h"
+﻿#include "GameObject.h"
 
 GameObject::GameObject()
 	:pParent_(nullptr)
@@ -12,4 +12,37 @@ GameObject::GameObject(GameObject* parent, const string& name)
 
 GameObject::~GameObject()
 {
+}
+
+void GameObject::DrawSub()
+{
+	//0.自分を描画
+	this->Draw();
+	//1.子オジェクトを描画 childlist_の各要素に対してDrawを呼ぶ
+	//for (auto itr = childList_.begin(); itr != childList_.end(); itr++)
+	//{
+	//	(*itr)->DrawSub();
+	//}
+	for (auto child : childList_)
+	{
+		child->DrawSub();
+	}
+}
+
+void GameObject::UpdateSub()
+{
+	this->Update();
+	for (auto child : childList_)
+	{
+		child->UpdateSub();
+	}
+}
+
+void GameObject::ReleaseSub()
+{
+	this->Release();
+	for (auto child : childList_)
+	{
+		child->ReleaseSub();
+	}
 }

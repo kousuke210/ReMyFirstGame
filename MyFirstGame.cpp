@@ -1,14 +1,20 @@
 ﻿// MyFirstGame.cpp : アプリケーションのエントリ ポイントを定義します。
+//
 
+#include <Windows.h>
+#include <stdlib.h>
 #include "framework.h"
 #include "MyFirstGame.h"
-#include "Engine/Direct3D.h"
-#include "Engine/Camera.h"
-#include "Engine/Transform.h"
-#include "Engine/Input.h"
-#include "Engine/RootJob.h"
+#include "Engine\\Direct3D.h"
+#include "Engine\\Camera.h"
+#include "Engine\\Transform.h"
+#include "Engine\\Input.h"
+#include "Engine\\RootJob.h"
 
-HWND hWnd = nullptr; //ハンドルウィンドウ
+#pragma comment(lib, "winmm.lib")
+
+HWND hWnd = nullptr;
+
 
 #define MAX_LOADSTRING 100
 
@@ -78,14 +84,45 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         //メッセージあり
 
-        while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+        if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
         //メッセージなし
+        
+
+        timeBeginPeriod(1);
+        static DWORD countFps = 0; //FPS計測用カウンタ
+        static DWORD startTime = timeGetTime();//初回の時間を保存
+        DWORD nowTime = timeGetTime();//現在の時間を取得
+        static DWORD lastUpdateTime = nowTime;
+
+
+
+        if (nowTime - startTime >= 1000)
+        {
+            std::string str = "FPS:" + std::to_string(nowTime - startTime)
+                + ", " + std::to_string(countFps);
+            SetWindowTextA(hWnd, str.c_str());
+            countFps = 0;
+            startTime = nowTime;
+        }
+        if ((nowTime - lastUpdateTime) * 60 <= 1000)
+        {
+            continue;
+        }
+        lastUpdateTime = nowTime;
+
+
+        countFps++;
+        //startTime = nowTime;
+
+        timeEndPeriod(1);
+
 
         //ゲームの処理
+
         Camera::Update(); // カメラの更新
         Input::Update(); // 入力の更新
 
@@ -101,20 +138,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+
         Direct3D::BeginDraw();
 
         //pRootJobから、すべてのオブジェクトの描画をする
+        pRootJob->DrawSub();
 
         Direct3D::EndDraw();
     }
 
-    pRootJob->Release();
+    pRootJob->ReleaseSub();
     Input::Release();
     Direct3D::Release();
 
     return (int)msg.wParam;
 }
 
+
+
+//
 //  関数: MyRegisterClass()
 //
 //  目的: ウィンドウ クラスを登録します。

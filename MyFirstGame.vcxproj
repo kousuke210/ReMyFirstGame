@@ -140,13 +140,14 @@
     <ClInclude Include="Engine\Camera.h" />
     <ClInclude Include="Engine\Direct3D.h" />
     <ClInclude Include="Engine\Fbx.h" />
+    <ClInclude Include="Engine\GameObject.h" />
     <ClInclude Include="Engine\RootJob.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Engine\Input.h" />
     <ClInclude Include="Engine\Quad.h" />
     <ClInclude Include="Engine\Sprite.h" />
-    <ClInclude Include="GameObject.h" />
     <ClInclude Include="MyFirstGame.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="PlayScene.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -157,14 +158,15 @@
     <ClCompile Include="Engine\Camera.cpp" />
     <ClCompile Include="Engine\Direct3D.cpp" />
     <ClCompile Include="Engine\Fbx.cpp" />
+    <ClCompile Include="Engine\GameObject.cpp" />
     <ClCompile Include="Engine\Input.cpp" />
     <ClCompile Include="Engine\RootJob.cpp" />
-    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="MyFirstGame.cpp" />
     <ClCompile Include="Engine\Quad.cpp" />
     <ClCompile Include="Engine\Sprite.cpp" />
     <ClCompile Include="Engine\Texture.cpp" />
     <ClCompile Include="Engine\Transform.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayScene.cpp" />
   </ItemGroup>
   <ItemGroup>

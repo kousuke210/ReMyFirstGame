@@ -46,7 +46,7 @@ private:
 		XMVECTOR normal;
 	};
 
-	//バッファの皆さん
+	//バッファ
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer** pIndexBuffer_;
 	ID3D11Buffer* pConstantBuffer_;

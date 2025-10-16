@@ -99,7 +99,7 @@ void Fbx::Draw(Transform& transform)
 
 	for (int i = 0; i < materialCount_; i++)
 	{
-		if(pMaterialList_[i].pTexture)
+		if (pMaterialList_[i].pTexture)
 		{
 			cb.materialFlag = TRUE;
 			cb.diffuse = XMFLOAT4(1, 1, 1, 1);//保険
@@ -158,7 +158,7 @@ void Fbx::InitVertex(FbxMesh* mesh)
 
 			//頂点の位置
 			FbxVector4 pos = mesh->GetControlPointAt(index);
-			vertices[index].position 
+			vertices[index].position
 				= XMVectorSet((float)pos[0], (float)pos[1], (float)pos[2], 0.0f);
 
 			//頂点のUV
@@ -166,7 +166,7 @@ void Fbx::InitVertex(FbxMesh* mesh)
 			int uvIndex = mesh->GetTextureUVIndex(poly, vertex, FbxLayerElement::eTextureDiffuse);
 			FbxVector2  uv = pUV->GetDirectArray().GetAt(uvIndex);
 			vertices[index].uv = XMVectorSet((float)uv.mData[0], (float)(1.0f - uv.mData[1]), 0.0f, 1.0f);
-		
+
 			//頂点の法線
 			FbxVector4 normal;
 			mesh->GetPolygonVertexNormal(poly, vertex, normal);
@@ -174,9 +174,9 @@ void Fbx::InitVertex(FbxMesh* mesh)
 				= XMVectorSet((float)normal[0], (float)normal[1], (float)normal[2], 0.0f);
 		}
 	}
-// 頂点バッファ作成
-//（自分でやって）
-//頂点バッファ
+	// 頂点バッファ作成
+	//（自分でやって）
+	//頂点バッファ
 	HRESULT hr;
 	D3D11_BUFFER_DESC bd_vertex;
 	bd_vertex.ByteWidth = sizeof(VERTEX) * vertexCount_;
@@ -303,7 +303,7 @@ void Fbx::InitMaterial(FbxNode* pNode)
 			else
 			{
 				//テクスチャファイルが無いときの処理(エラー）
-				
+
 			}
 
 		}
