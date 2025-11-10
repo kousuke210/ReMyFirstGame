@@ -1,12 +1,12 @@
 #pragma once
-
 #include <list>
 #include <string>
 #include "Transform.h"
-#include "SphereCollider.h"
 
 using std::string;
 using std::list;
+
+class SphereCollider;
 
 class GameObject
 {
@@ -44,10 +44,10 @@ public:
 		return(obj);
 	}
 protected:
-	list<GameObject*> childList_;
-	Transform	transform_;
+	list<GameObject*>	childList_;
+	Transform			transform_;
 	GameObject* pParent_;
-	string	objectName_;
+	string				objectName_;
 	SphereCollider* pCollider_;
 private:
 	bool isDead_;

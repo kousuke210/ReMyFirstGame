@@ -1,6 +1,6 @@
 #include "Player.h"
-#include "Engine\\Fbx.h"
-#include "Engine\\Model.h"
+#include "Engine/Fbx.h"
+#include "Engine/Model.h"
 #include "ChildOden.h"
 #include "Engine/SphereCollider.h"
 
@@ -20,7 +20,7 @@ void Player::Initialize()
 	//// のチェックを入れた方がいいよ
 	//pFbx_->Load("oden.fbx");
 
-	hModel = Model::Load("oden.fbx");
+	hModel = Model::Load("D:/GE2A13/PG/MyFirstGame/Assets");
 	assert(hModel >= 0);
 	transform_.scale_.x = 0.7f;
 	transform_.scale_.y = 0.7f;
