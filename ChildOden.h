@@ -1,24 +1,20 @@
 #pragma once
 #include "Engine/GameObject.h"
 
-
 class Fbx;
-class ChildOden;
 
-class Player :
+class ChildOden :
 	public GameObject
 {
 public:
-	Player(GameObject* parent);
-	~Player();
+	ChildOden(GameObject* parent);
+	~ChildOden();
 	//純粋仮想関数のオーバーライド
 	void Initialize() override;
 	void Update() override;
 	void Draw() override;
 	void Release() override;
 private:
-	int hModel;
-	//Fbx* pFbx_;
-	ChildOden* pRChildOden_;
-	ChildOden* pLChildOden_;
+	Fbx* pFbx_;
+	int hModel_;//モデルハンドル
 };

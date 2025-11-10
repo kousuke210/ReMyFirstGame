@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include "Transform.h"
+#include "SphereCollider.h"
 
 using std::string;
 using std::list;
@@ -21,16 +22,33 @@ public:
 	void DrawSub();
 	void UpdateSub();
 	void ReleaseSub();
+
+	void SetPosition(XMFLOAT3 position);
+	void SetPosition(float x, float y, float z);
+	void KillMe();
+
+	GameObject* GetRootJob();
+	GameObject* FindChildObject(const string& name);
+	GameObject* FindObject(const string& name);
+
+	void AddCollider(SphereCollider* pCollider);
+	void Collision(GameObject* pTarget);
+	void RoundRobin(GameObject* pTarget);
+
 	template<class T>
-	void Instantiate(GameObject* parent)
+	GameObject* Instantiate(GameObject* parent)
 	{
 		T* obj = new T(parent);
 		obj->Initialize();
 		childList_.push_back(obj);
+		return(obj);
 	}
 protected:
 	list<GameObject*> childList_;
 	Transform	transform_;
 	GameObject* pParent_;
 	string	objectName_;
+	SphereCollider* pCollider_;
+private:
+	bool isDead_;
 };

@@ -1,48 +1,54 @@
-﻿#include "GameObject.h"
+﻿#pragma once
+#include <list>
+#include <string>
+#include "Transform.h"
 
-GameObject::GameObject()
-	:pParent_(nullptr)
-{
-}
+using std::string;
+using std::list;
 
-GameObject::GameObject(GameObject* parent, const string& name)
-	:pParent_(parent), objectName_(name)
-{
-}
+class SphereCollider;
 
-GameObject::~GameObject()
+class GameObject
 {
-}
+public:
+	GameObject();
+	GameObject(GameObject* parent, const string& name);
+	virtual ~GameObject();
 
-void GameObject::DrawSub()
-{
-	//0.自分を描画
-	this->Draw();
-	//1.子オジェクトを描画 childlist_の各要素に対してDrawを呼ぶ
-	//for (auto itr = childList_.begin(); itr != childList_.end(); itr++)
-	//{
-	//	(*itr)->DrawSub();
-	//}
-	for (auto child : childList_)
+	virtual void Initialize() = 0;
+	virtual void Update() = 0;
+	virtual void Draw() = 0;
+	virtual void Release() = 0;
+	void DrawSub();
+	void UpdateSub();
+	void ReleaseSub();
+
+	void SetPosition(XMFLOAT3 position);
+	void SetPosition(float x, float y, float z);
+	void KillMe();
+
+	GameObject* GetRootJob();
+	GameObject* FindChildObject(const string& name);
+	GameObject* FindObject(const string& name);
+
+	void AddCollider(SphereCollider* pCollider);
+	void Collision(GameObject* pTarget);
+	void RoundRobin(GameObject* pTarget);
+
+	template<class T>
+	GameObject* Instantiate(GameObject* parent)
 	{
-		child->DrawSub();
+		T* obj = new T(parent);
+		obj->Initialize();
+		childList_.push_back(obj);
+		return(obj);
 	}
-}
-
-void GameObject::UpdateSub()
-{
-	this->Update();
-	for (auto child : childList_)
-	{
-		child->UpdateSub();
-	}
-}
-
-void GameObject::ReleaseSub()
-{
-	this->Release();
-	for (auto child : childList_)
-	{
-		child->ReleaseSub();
-	}
-}
+protected:
+	list<GameObject*>	childList_;
+	Transform			transform_;
+	GameObject* pParent_;
+	string				objectName_;
+	SphereCollider* pCollider_;
+private:
+	bool isDead_;
+};

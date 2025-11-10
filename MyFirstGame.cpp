@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include "framework.h"
 #include "MyFirstGame.h"
-#include "Engine\\Direct3D.h"
-#include "Engine\\Camera.h"
-#include "Engine\\Transform.h"
-#include "Engine\\Input.h"
-#include "Engine\\RootJob.h"
+#include "Engine/Direct3D.h"
+#include "Engine/Camera.h"
+#include "Engine/Transform.h"
+#include "Engine/Input.h"
+#include "Engine/RootJob.h"
 
 #pragma comment(lib, "winmm.lib")
 
@@ -90,7 +90,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
         //メッセージなし
-        
 
         timeBeginPeriod(1);
         static DWORD countFps = 0; //FPS計測用カウンタ
@@ -120,13 +119,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         timeEndPeriod(1);
 
-
         //ゲームの処理
-
         Camera::Update(); // カメラの更新
         Input::Update(); // 入力の更新
 
-        pRootJob->Update();
+        pRootJob->UpdateSub();
 
         if (Input::IsKeyDown(DIK_ESCAPE))
         {
