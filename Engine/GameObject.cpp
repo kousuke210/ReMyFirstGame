@@ -37,7 +37,6 @@ void GameObject::DrawSub()
 
 void GameObject::UpdateSub()
 {
-
 	transform_.Calculation();
 	this->Update();
 
@@ -60,8 +59,6 @@ void GameObject::UpdateSub()
 			++itr;
 		}
 	}
-
-
 }
 
 void GameObject::ReleaseSub()
@@ -158,7 +155,7 @@ void GameObject::RoundRobin(GameObject* pTarget)
 	if (pCollider_ == nullptr)
 		return;
 	//②自分とターゲット自体のコライダーの当たり判定
-	if (pTarget->pCollider_ != nullptr)
+	if (pTarget->pCollider_ != nullptr && pTarget->pCollider_ != pCollider_)
 		Collision(pTarget);
 	//③再帰的なやつで、ターゲットの子オブジェクトを当たり判定してく
 	for (auto itr : pTarget->childList_)
